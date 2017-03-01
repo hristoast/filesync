@@ -1,0 +1,7 @@
+__pycache__
+filesync-*.*
+filesync-*.*.sha256sum
+build/
+dist/
+*.egg-info/
+*.spec
