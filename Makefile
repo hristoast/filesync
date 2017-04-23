@@ -1,12 +1,19 @@
-VERSION = $$(grep VERSION\  fs/fs.py | awk -F\" '{ print  $$2 }')
+HAVE_PYINSTALLER = $(shell which pyinstaller 2>/dev/null && echo 0 || echo 1)
+VERSION = $(shell grep VERSION\  fs/fs.py | awk -F\" '{ print  $$2 }')
 
 .DEFAULT_GOAL:= exe
+
+check_pyinstaller:
+ifeq ($(HAVE_PYINSTALLER), 1)
+	@echo PyInstaller is required to build an executable!
+	@exit 1
+endif
 
 clean:
 	@/bin/rm -fr build dist *.egg-info ./fs/__pycache__ ./fs/build ./fs/dist \
 	filesync-* filesync-*.sha256sum ./fs/filesync.spec
 
-exe:
+exe: check_pyinstaller
 	@cd fs && \
 	pyinstaller --name filesync --onefile fs.py && \
 	cd .. && \
