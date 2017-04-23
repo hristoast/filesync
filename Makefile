@@ -1,6 +1,6 @@
 VERSION = $$(grep VERSION\  fs/fs.py | awk -F\" '{ print  $$2 }')
 
-.DEFAULT_GOAL:= install
+.DEFAULT_GOAL:= exe
 
 clean:
 	@/bin/rm -fr build dist *.egg-info ./fs/__pycache__ ./fs/build ./fs/dist \
