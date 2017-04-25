@@ -11,7 +11,7 @@ endif
 
 clean:
 	@/bin/rm -fr build dist *.egg-info ./fs/__pycache__ ./fs/build ./fs/dist \
-	filesync-* filesync-*.sha256sum ./fs/filesync.spec
+	filesync-* filesync-*.sha256sum ./fs/filesync.spec ./__pycache__
 
 exe: check_pyinstaller
 	@cd fs && \
