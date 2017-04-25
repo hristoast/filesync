@@ -2,6 +2,7 @@ import argparse
 import configparser
 import logging
 import os
+import shlex
 import subprocess
 import sys
 import textwrap
@@ -180,13 +181,14 @@ def _is_verbose(config: configparser.ConfigParser) -> bool:
 def make_backup_file(path: str, host=None) -> T[bool, str]:
     backup = path + "-" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     if host:
-        cmd = "ssh {0} /bin/cp -af {1} {2}".format(host, path, backup)
+        cmd = ["ssh", "{}".format(host), "/bin/cp", "-afr",
+               "{}".format(shlex.quote(path)), "{}".format(shlex.quote(backup))]
     else:
-        cmd = "/bin/cp -af {0} {1}".format(path, backup)
-    p = subprocess.Popen(cmd.split(), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    p.communicate()
+        cmd = ["/bin/cp", "-afr", "{}".format(path), "{}".format(backup)]
+    p = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    c = p.communicate()
     if p.returncode != 0:
-        return False
+        return False, c[1].decode()
     return backup
 
 

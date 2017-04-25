@@ -62,13 +62,29 @@ class FileSyncTestCase(TestCase):
 
     def test_make_backup_file_fake_file(self):
         backup = make_backup_file("idkjaja")
-        self.assertFalse(backup)
+        self.assertTrue(False in backup)
 
     def test_make_backup_file_localhost(self):
         backup = make_backup_file(os.path.abspath("filesync.conf"),
                                   host=self.h)
         f = check_file_sha(backup, host=self.h).decode()
         self.assertIsInstance(f, str)
+        os.remove(backup)
+
+    def test_make_backup_file_with_special_characters(self):
+        annoying_file = '/tmp/s p a ! c 3 s ? [ ] ) ( .txt'
+        os.system("touch '{}'".format(annoying_file))
+        backup = make_backup_file(annoying_file)
+        self.assertTrue(backup)
+        os.remove(annoying_file)
+        os.remove(backup)
+
+    def test_make_backup_file_with_special_characters_localhost(self):
+        annoying_file = '/tmp/s p a ! c 3 s ? [ ] ) ( .txt'
+        os.system("touch '{}'".format(annoying_file))
+        backup = make_backup_file(annoying_file, host=self.h)
+        self.assertTrue(backup)
+        os.remove(annoying_file)
         os.remove(backup)
 
     def test_parse_args_clean(self):
