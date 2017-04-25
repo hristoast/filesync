@@ -86,8 +86,7 @@ def compare_files(file1: str, file2: str) -> bool:
 
 def emit_log(msg: str, level=logging.INFO, quiet=False, *args, **kwargs):
     if not quiet:
-        global VERBOSE
-        if not VERBOSE:
+        if "verbose" not in kwargs or kwargs["verbose"] is not True:
             msg = textwrap.shorten(msg, width=int(get_terminal_dims()[0]) - 5,
                                    placeholder="...")
         if level == logging.DEBUG:
@@ -225,7 +224,7 @@ def _check_file(d: dict, k: str, padding: int, local: bool, remote: bool) -> boo
         return f
 
 
-def sync_files(config: configparser.ConfigParser, direction: str):
+def sync_files(config: configparser.ConfigParser, direction: str, verbose=False):
     """
     Sync 'src' to 'dest', or 'dest' to 'src' (depending on the 'direction',)
     but check the sha256sum of each file first to ensure that a sync
@@ -276,9 +275,8 @@ def sync_files(config: configparser.ConfigParser, direction: str):
     r_pad = l_list[-1] + 3  # Pad for a colon and two spaces
 
     # Iterate through the sync_dict, sync as needed
-    global VERBOSE
     for key in sync_dict.keys():
-        if VERBOSE is True:
+        if verbose:
             l_pad = len(key) + 3
             r_pad = len(key) + 3
 
@@ -352,8 +350,7 @@ def sync_files(config: configparser.ConfigParser, direction: str):
 
 def parse_args(args: list) -> str:
     force = False
-    global VERBOSE
-    VERBOSE = verbose = False
+    verbose = False
     parser = argparse.ArgumentParser(description=DESCRIPTION, prog=PROGNAME)
     actions = parser.add_mutually_exclusive_group(required=True)
     actions.add_argument("--clean", action="store_true", help="Clean up backup files created during sync")
@@ -398,7 +395,7 @@ def parse_args(args: list) -> str:
         verbose = _is_verbose(c)
 
     if verbose:
-        VERBOSE = True
+        verbose = True
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO
@@ -432,10 +429,10 @@ def parse_args(args: list) -> str:
         print("CLEAN!")
     elif parsed_args.pull:
         # Pull files from the remote host
-        sync_files(c, "pull")
+        sync_files(c, "pull", verbose=verbose)
     elif parsed_args.push:
         # Push files to the remote host
-        sync_files(c, "push")
+        sync_files(c, "push", verbose=verbose)
     else:
         parser.print_usage()
     emit_log("END filesync run at {}".format(
